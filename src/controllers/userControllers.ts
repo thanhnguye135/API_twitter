@@ -8,7 +8,13 @@ export const getAllUsers = async (
   res: Response,
   next: NextFunction
 ) => {
-  const allUsers = await prisma.user.findMany();
+  const allUsers = await prisma.user.findMany({
+    include: {
+      tweets: {
+        select: { id: true, content: true, image: true, impression: true },
+      },
+    },
+  });
 
   res.json(allUsers);
 };
@@ -19,10 +25,23 @@ export const getOneUser = async (
   next: NextFunction
 ) => {
   const { id } = req.params;
-  const user = await prisma.user.findUnique({ where: { id: +id } });
+  const user = await prisma.user.findUnique({
+    where: { id: +id },
+    include: {
+      tweets: {
+        select: { id: true, content: true, image: true, impression: true },
+      },
+    },
+  });
 
   res.json(user);
 };
+
+// TEST WITH CURL WITHOUT POSTMAN
+
+// curl -X POST -H "Content-Type: application/json" \
+// -d "{\"name\": \"Elon Musk\", \"email\": \"doge@twitter.com\", \"username\": \"elon\"}" \
+// http://localhost:3000/api/v1/users
 
 export const createOneUser = async (
   req: Request,
