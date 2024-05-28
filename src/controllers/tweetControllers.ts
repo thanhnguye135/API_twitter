@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
 
 const prisma = new PrismaClient();
+type AuthRequest = Request & { user?: User };
 
 export const getAllTweets = async (
   req: Request,
@@ -58,17 +59,18 @@ export const getOneTweet = async (
 };
 
 export const createOneTweet = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
-  const { content, image, impression, userId } = req.body;
+  const { content, image, impression } = req.body;
+  const user = req.user;
   const tweet = await prisma.tweet.create({
     data: {
       content,
       image,
       impression,
-      userId,
+      userId: user?.id || 1,
     },
   });
 
